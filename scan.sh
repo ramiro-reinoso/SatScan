@@ -26,7 +26,7 @@ do
   echo $i
   sat=`perl pickfield.pl 2 $i`
   trans=`perl pickfield.pl 3 $i`
-  filename=$(echo scan-$sat-$trans.csv)
+  filename=$(echo scan-$sat-$trans.xml)
   echo $filename
   perl gen_demod_req.pl $sat $trans
   demodsetfile=("demodset-$sat-$trans*.xml")
@@ -54,8 +54,8 @@ do
 
   for j in 1 2 3
   do
-    wget --post-file=$demodsetfile --http-user=configure --http-password=configure $ipaddr/BrowseConfig.pvr > /dev/null
-    echo $j
+    wget --post-file=$demodsetfile --http-user=configure --http-password=configure $ipaddr/BrowseConfig.pvr &> /dev/null
+    echo Configuring demod try $j
     if grep '<ok \/>' BrowseConfig.pvr >/dev/null 
     then
       rm -f BrowseConfig.pvr
@@ -68,11 +68,11 @@ do
 
   for k in 1 2 3
   do
-    wget --post-file=$tsreadfile --http-user=configure --http-password=configure $ipaddr/BrowseConfig.pvr > /dev/null
+    echo Getting TS information try $k
+    wget --post-file=$tsreadfile --http-user=configure --http-password=configure $ipaddr/BrowseConfig.pvr &> /dev/null
     if grep '<ok \/>' BrowseConfig.pvr >/dev/null 
     then
-      grep ServiceName BrowseConfig.pvr | sed 's/\t//g' | sed 's/<ServiceName>//' | sed 's/<\/ServiceName>//' > results/$filename
-      rm -f BrowseConfig.pvr
+      mv BrowseConfig.pvr xml/$filename
       break
     fi
     rm -f BrowseConfig.pvr

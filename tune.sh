@@ -23,15 +23,13 @@ fi
 
 for i in `grep ,$st,$tr carriersdb.csv`
 do
-  echo $i
   sat=`perl pickfield.pl 2 $i`
   trans=`perl pickfield.pl 3 $i`
   filename=$(echo scan-$sat-$trans.csv)
-  echo $filename
   perl gen_demod_req.pl $sat $trans
   demodsetfile=("demodset-$sat-$trans*.xml")
   tsreadfile=("readts-$sat-$trans*.xml")
-  echo $demodsetfile
+
   if [ ! -f $demodsetfile ]
   then
     echo Failed to create demod set XML file for $sat $trans.
@@ -40,21 +38,11 @@ do
     demodsetfile=`ls $demodsetfile`
   fi
 
-  if [ ! -f $tsreadfile ]
-  then
-    echo Failed to create tsread XML file for $sat $trans.
-    continue
-  else
-    tsreadfile=`ls $tsreadfile`
-  fi
-
   ipaddr=`echo $demodsetfile | sed "s/demodset-$sat-$trans-//" | sed 's/.xml//'`
-
-  echo $ipaddr
 
   for j in 1 2 3
   do
-    wget --post-file=$demodsetfile --http-user=configure --http-password=configure $ipaddr/BrowseConfig.pvr > /dev/null
+    wget --post-file=$demodsetfile --http-user=configure --http-password=configure $ipaddr/BrowseConfig.pvr &> /dev/null
     echo $j
     if grep '<ok \/>' BrowseConfig.pvr >/dev/null 
     then
@@ -66,21 +54,7 @@ do
 
   echo $sat-$trans tuned on PVR $ipaddr
 
-#  sleep 10
-#
-#  for k in 1 2 3
-#  do
-#    wget --post-file=$tsreadfile --http-user=configure --http-password=configure $ipaddr/BrowseConfig.pvr > /dev/null
-#    if grep '<ok \/>' BrowseConfig.pvr >/dev/null 
-#    then
-#      grep ServiceName BrowseConfig.pvr | sed 's/\t//g' | sed 's/<ServiceName>//' | sed 's/<\/ServiceName>//' > results/$filename
-#      rm -f BrowseConfig.pvr
-#      break
-#    fi
-#    rm -f BrowseConfig.pvr
-#  done
   rm -f $demodsetfile
   rm -f $tsreadfile
 done
  
-

@@ -1,2 +1,6 @@
 results/*
+xml/*
 *.pvr
+*.xml
+*.csv
+programs/*
