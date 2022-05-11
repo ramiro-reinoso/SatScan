@@ -21,8 +21,6 @@ my @pidList = (0) x 10000;
 
 my $dom = XML::LibXML->load_xml(location => $filename);
 
-#print "Channel Name,Video Type,Video Bit Rate (bps),Channel Video Bit Rate (bps)\n";
-
 my $emptyflag = 0;
 
 foreach my $service ($dom->findnodes('/hconf/get-status/filter/InputTs/InputService')) {
@@ -35,6 +33,21 @@ foreach my $service ($dom->findnodes('/hconf/get-status/filter/InputTs/InputServ
    }
 
 }
+
+if($emptyflag == 0) {
+  foreach my $channels ($dom->findnodes('/MPEG-TABLES/PMTs/CHANNEL')) {
+
+  my $channelName = $channels->findvalue('./SHORT-NAME');
+  $channelName =~ s/\n//g;
+  $channelName =~ s/\r//g;
+
+     if($channelName ne '')
+     {
+        $emptyflag = 1;
+     }
+  }
+}
+
 
 if($emptyflag == 0)
 {
