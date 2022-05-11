@@ -21,7 +21,7 @@ then
     tr=$(echo $2,)
 fi
 
-for i in `grep ,$st,$tr carriersdb.csv`
+for i in `grep ,$st,$tr CarriersDb.csv`
 do
   echo $i
   sat=`perl pickfield.pl 2 $i`
