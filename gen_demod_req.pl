@@ -58,13 +58,17 @@ while(my $line = <$fh>)
   # Break up the line into its fields
   my @fields = split(',',$line);
 
-  # Check for video carrier flag and if not a video carrier then get the next line
-  if ($fields[11] eq 'N') {next;}
-
   # Test if there is a match for the satellite and carrier
   # If there is match, extract the carrier parameters
   if (($fields[1] eq $satellite) && ($fields[2] eq $carrier))
   {
+    # Check for video carrier flag and if not a video carrier or not marked 
+    # for scanning then exit with error
+    if ($fields[11] eq 'N') {
+      print "Carrier not tagged for scanning.\n";
+      exit(1);
+    }
+
     my $polarization = $fields[10];
     $lbandfreq = $fields[3]/1000;
     $symbolrate = $fields[8];
@@ -99,7 +103,7 @@ while(my $line = <$fh>)
      if ($success == 0)
      {
        print "Could not find PVR configured for $satellite or carrier $carrier is not a video carrier.\n";
-       exit(-1);
+       exit(2);
      }
 
      # Since we found a match in the carrier database and we found a PVR to use then there his no need
@@ -116,7 +120,7 @@ close($fh);
 if ($success == 0)
 {
    print "Could not find $carrier configured for this satellite.\n";
-   exit(-1);
+   exit(3);
 }
 
 # Define the filenames for the XML configuration files  using the satellite and transponder names

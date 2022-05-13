@@ -21,14 +21,40 @@ then
     tr=$(echo $2,)
 fi
 
-for i in `grep ,$st,$tr CarriersDb.csv`
+# Create a database without spaces to avoid confusing the CSV parser
+
+sed 's/ /_/g' CarriersDb.csv > temp_carriersdb.csv
+
+found="0"
+
+for i in `grep ,$st,$tr temp_carriersdb.csv`
 do
+  found="1"
   echo $i
   sat=`perl pickfield.pl 2 $i`
   trans=`perl pickfield.pl 3 $i`
   filename=$(echo scan-$sat-$trans.xml)
   echo $filename
-  perl gen_demod_req.pl $sat $trans
+  perl gen_demod_req.pl $sat $trans > /dev/null
+
+  # Check for any error codes from the demodulation request generator
+  # and take appropriate action upon errors
+
+  retVal=$?
+  if [ $retVal -eq 1 ]
+  then
+     echo "Carrier not tagged for scanning."
+     continue
+  elif [ $retVal -eq 2 ]
+  then
+     echo "Cannot PVR configuration for this carrier."
+     continue
+  elif [ $retVal -eq 3 ]
+  then
+     echo "Carrier not found in carrier database."
+     continue
+  fi
+
   demodsetfile=("demodset-$sat-$trans*.xml")
   tsreadfile=("readts-$sat-$trans*.xml")
   echo $demodsetfile
@@ -77,8 +103,13 @@ do
     fi
     rm -f BrowseConfig.pvr
   done
+
   rm -f $demodsetfile
   rm -f $tsreadfile
 done
  
+if [ $found == "0" ]
+then
+  echo "Carrier not found in the database"
+fi
 
