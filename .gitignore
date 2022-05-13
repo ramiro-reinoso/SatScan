@@ -1,5 +1,6 @@
 results/*
 xml/*
+logs/*
 *.pvr
 *.xml
 *.csv

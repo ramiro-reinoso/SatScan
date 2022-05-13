@@ -57,8 +57,10 @@ echo "Mailing the transponder traffic report" >> $log_file
 echo "Transponder traffic report." | mail -s "Transponder Traffic Report" -A $current_report ramiro.reinoso@ses.com >> $log_file
 
 # Mail the difference between current and previous reports
+sed -z 's/\n/,/g;s/,-/\n/g' $previous_report > temp1
+sed -z 's/\n/,/g;s/,-/\n/g' $current_report > temp2
 echo "Mailing the differences between the previous and current transponder traffic reports" >> $log_file
-diff $previous_report $current_report | mail -s "Changes from previous report." ramiro.reinoso@ses.com >> $log_file
+diff temp1 temp2 | mail -s "Changes from previous report." ramiro.reinoso@ses.com >> $log_file
 
 # Mail the list of transponders with no services
 echo "Mailing the list of transponders without any services" >> $log_file
